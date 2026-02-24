@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Agenda Pro 2026 - Cores na Impressão</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --accent: #3b82f6;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --secondary: #64748b;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 550px; background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 80px; }
+        
+        /* Formulário */
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        input { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; outline: none; }
+        .action-right { display: flex; justify-content: flex-end; margin-bottom: 20px; gap: 10px; }
+        .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; border: none; font-weight: 500; }
+        .btn-accent { background: var(--accent); color: white; }
+
+        /* Lista */
+        ul { list-style: none; padding: 0; margin-top: 20px; }
+        .task-item { 
+            padding: 12px; border: 1px solid #f1f5f9; border-left: 5px solid var(--accent); 
+            margin-bottom: 12px; border-radius: 6px; background: #fff;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .task-main { display: flex; justify-content: space-between; align-items: center; }
+
+        /* Timeline Barra */
+        .progress-container { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+        .progress-bar { height: 100%; width: 0%; transition: width 1s linear; }
+
+        .notificar-atraso { animation: flash-red 1s infinite; border-left-color: var(--danger) !important; }
+        @keyframes flash-red { 0%, 100% { background: #fff; } 50% { background: #fef2f2; } }
+        
+        .done { opacity: 0.6; border-left-color: var(--success) !important; }
+        .done .progress-container { display: none; }
+
+        .controls { display: flex; gap: 6px; }
+        .btn-circle { width: 28px; height: 28px; border-radius: 50%; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+        
+        /* Rodapé */
+        .footer-tools { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 10px; border-top: 1px solid #e2e8f0; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; z-index: 100; }
+        .btn-tool { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 5px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; }
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
+        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+
+        #printHeader { display: none; }
+
+        /* --- AJUSTE CIRÚRGICO DA IMPRESSÃO --- */
+        @media print {
+            #printHeader { display: block; text-align: center; border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px; }
+            .no-print, .footer-tools, .controls, .progress-container, h2 { display: none !important; } 
+            
+            body { padding: 0; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; margin: 0; }
+            
+            .task-item { 
+                border: 1px solid #eee !important; 
+                background: white !important; 
+                border-left: 12px solid #3b82f6 !important; /* Azul por padrão */
+                margin-bottom: 10px;
+                padding: 10px !important;
+                display: block !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Forçar cores específicas na impressão */
+            .notificar-atraso { 
+                border-left-color: #ef4444 !important; /* Vermelho */
+            }
+            .done { 
+                border-left-color: #22c55e !important; /* Verde */
+                opacity: 1 !important;
+            }
+            .done b { text-decoration: line-through; color: #1e293b !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="printHeader">
+    <h1 style="margin: 0; font-size: 22px;">Relatório de Atividades</h1>
+    <p style="margin: 5px 0; font-size: 12px;">Gerado em: <span id="printDate"></span></p>
+</div>
+
+<div class="container">
+    <h2 class="no-print" style="text-align:center;">Lista de Tarefas</h2>
+    
+    <div class="form-group no-print">
+        <input type="hidden" id="editId">
+        <input type="text" id="taskInput" placeholder="Que tarefa quer agendar?">
+        <input type="datetime-local" id="dateInput">
+    </div>
+    <div class="action-right no-print">
+        <button id="cancelBtn" class="btn-sm" style="display:none; background:#ccc" onclick="cancelarEdicao()">Cancelar</button>
+        <button id="mainBtn" class="btn-sm btn-accent" onclick="processarTarefa()">+ Agendar</button>
+    </div>
+
+    <ul id="listaTarefas"></ul>
+</div>
+
+<div class="footer-tools no-print">
+    <span style="font-size: 11px; color: #94a3b8; margin-right: 10px;" id="relogio"></span>
+    <button class="btn-tool" onclick="exportarBackup()">💾 Exportar</button>
+    <div class="file-input-wrapper">
+        <button class="btn-tool">📂 Importar</button>
+        <input type="file" accept=".json" onchange="importarBackup(event)">
+    </div>
+    <button class="btn-tool" onclick="prepararImpressao()">🖨️ Imprimir</button>
+    <button class="btn-tool" style="color: var(--danger);" onclick="limparAgenda()">🗑️ Limpar Tudo</button>
+</div>
+
+<script>
+    const DB_NAME = 'agenda_2026_vGold_Final';
+    const lista = document.getElementById('listaTarefas');
+
+    window.onload = () => {
+        definirDataAtual();
+        carregarTarefas();
+        setInterval(atualizarInterface, 1000);
+    };
+
+    function prepararImpressao() {
+        document.getElementById('printDate').innerText = new Date().toLocaleString('pt-BR');
+        window.print();
+    }
+
+    function atualizarInterface() {
+        const agora = new Date();
+        const rel = document.getElementById('relogio');
+        if(rel) rel.innerText = agora.toLocaleTimeString('pt-BR');
+        
+        document.querySelectorAll('.task-item').forEach(item => {
+            if (item.getAttribute('data-concluida') === 'true') return;
+
+            const inicio = parseInt(item.getAttribute('data-criacao'));
+            const fim = new Date(item.getAttribute('data-hora')).getTime();
+            const total = fim - inicio;
+            const decorrido = agora.getTime() - inicio;
+            
+            let percent = Math.min(Math.max((decorrido / total) * 100, 0), 100);
+            const barra = item.querySelector('.progress-bar');
+            
+            if (barra) {
+                barra.style.width = percent + "%";
+                if (agora.getTime() >= fim) {
+                    barra.style.backgroundColor = 'var(--danger)';
+                    item.classList.add('notificar-atraso');
+                } else {
+                    item.classList.remove('notificar-atraso');
+                    if (percent > 80) barra.style.backgroundColor = 'var(--warning)';
+                    else if (percent > 50) barra.style.backgroundColor = '#facc15';
+                    else barra.style.backgroundColor = 'var(--success)';
+                }
+            }
+        });
+    }
+
+    function definirDataAtual() {
+        const agora = new Date();
+        const f = (n) => String(n).padStart(2, '0');
+        document.getElementById('dateInput').value = `${agora.getFullYear()}-${f(agora.getMonth()+1)}-${f(agora.getDate())}T${f(agora.getHours())}:${f(agora.getMinutes())}`;
+    }
+
+    function processarTarefa() {
+        const txt = document.getElementById('taskInput');
+        const dt = document.getElementById('dateInput');
+        const idEd = document.getElementById('editId').value;
+        if (!txt.value) return;
+
+        let tarefas = JSON.parse(localStorage.getItem(DB_NAME)) || [];
+
+        if (idEd) {
+            const idx = tarefas.findIndex(t => t.id == idEd);
+            if (idx !== -1) {
+                tarefas[idx].texto = txt.value;
+                tarefas[idx].data = dt.value;
+            }
+            cancelarEdicao();
+        } else {
+            tarefas.push({ id: Date.now(), criacao: Date.now(), texto: txt.value, data: dt.value, concluida: false });
+        }
+
+        localStorage.setItem(DB_NAME, JSON.stringify(tarefas));
+        txt.value = '';
+        definirDataAtual();
+        carregarTarefas();
+    }
+
+    function carregarTarefas() {
+        lista.innerHTML = '';
+        const tarefas = JSON.parse(localStorage.getItem(DB_NAME)) || [];
+        tarefas.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+        tarefas.forEach(t => {
+            const li = document.createElement('li');
+            li.className = `task-item ${t.concluida ? 'done' : ''}`;
+            li.setAttribute('data-hora', t.data);
+            li.setAttribute('data-criacao', t.criacao || t.id);
+            li.setAttribute('data-concluida', t.concluida);
+
+            li.innerHTML = `
+                <div class="task-main">
+                    <div><b>${t.texto}</b><br><small style="color:var(--secondary)">⏰ ${new Date(t.data).toLocaleString()}</small></div>
+                    <div class="controls no-print">
+                        <button class="btn-circle" style="background:var(--accent)" onclick="editarTarefa(${t.id})">✎</button>
+                        <button class="btn-circle" style="background:var(--success)" onclick="toggle(${t.id})">✓</button>
+                        <button class="btn-circle" style="background:var(--danger)" onclick="del(${t.id})">✕</button>
+                    </div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+            `;
+            lista.appendChild(li);
+        });
+        atualizarInterface();
+    }
+
+    function editarTarefa(id) {
+        const ts = JSON.parse(localStorage.getItem(DB_NAME)) || [];
+        const t = ts.find(t => t.id == id);
+        if (t) {
+            document.getElementById('taskInput').value = t.texto;
+            document.getElementById('dateInput').value = t.data;
+            document.getElementById('editId').value = t.id;
+            document.getElementById('mainBtn').innerText = "Salvar";
+            document.getElementById('cancelBtn').style.display = "inline-block";
+            window.scrollTo(0,0);
+        }
+    }
+
+    function cancelarEdicao() {
+        document.getElementById('editId').value = '';
+        document.getElementById('taskInput').value = '';
+        document.getElementById('mainBtn').innerText = "+ Agendar";
+        document.getElementById('cancelBtn').style.display = "none";
+        definirDataAtual();
+    }
+
+    function toggle(id) {
+        let ts = JSON.parse(localStorage.getItem(DB_NAME));
+        ts = ts.map(t => t.id === id ? {...t, concluida: !t.concluida} : t);
+        localStorage.setItem(DB_NAME, JSON.stringify(ts));
+        carregarTarefas();
+    }
+
+    function del(id) {
+        if(confirm("Excluir?")) {
+            let ts = JSON.parse(localStorage.getItem(DB_NAME));
+            localStorage.setItem(DB_NAME, JSON.stringify(ts.filter(t => t.id !== id)));
+            carregarTarefas();
+        }
+    }
+
+    function limparAgenda() {
+        if (confirm("Limpar tudo?")) {
+            localStorage.setItem(DB_NAME, JSON.stringify([]));
+            carregarTarefas();
+        }
+    }
+
+    function exportarBackup() {
+        const dados = localStorage.getItem(DB_NAME);
+        const blob = new Blob([dados], {type: 'application/json'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `agenda_v2026.json`;
+        a.click();
+    }
+
+    function importarBackup(event) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            localStorage.setItem(DB_NAME, e.target.result);
+            carregarTarefas();
+            alert("Backup Restaurado!");
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+</script>
+</body>
+</html>
