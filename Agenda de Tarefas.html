@@ -270,13 +270,36 @@
     }
 
     function exportarBackup() {
-        const dados = localStorage.getItem(DB_NAME);
-        const blob = new Blob([dados], {type: 'application/json'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-         a.download = `backup_agenda_${currentYear}_${dataStr}_${horaStr}.json`;
-        a.click();
+    // 1. Pegar os dados da agenda que estão no LocalStorage
+    const dados = localStorage.getItem(DB_NAME);
+    
+    if (!dados || dados === "[]") {
+        alert("Não há tarefas para exportar.");
+        return;
     }
+
+    // 2. Gerar a data e hora para o nome do arquivo
+    const agora = new Date();
+    const f = (n) => String(n).padStart(2, '0');
+    const dataStr = `${f(agora.getDate())}-${f(agora.getMonth() + 1)}`;
+    const horaStr = `${f(agora.getHours())}h${f(agora.getMinutes())}`;
+    const nomeArquivo = `backup_agenda_2026_${dataStr}_${horaStr}.json`;
+
+    // 3. Criar o arquivo e disparar o download
+    const blob = new Blob([dados], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    
+    a.href = url;
+    a.download = nomeArquivo;
+    document.body.appendChild(a); // Necessário para alguns navegadores
+    a.click();
+    
+    // Limpeza
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 
     function importarBackup(event) {
         const reader = new FileReader();
