@@ -274,7 +274,7 @@
         const blob = new Blob([dados], {type: 'application/json'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `agenda_v2026.json`;
+         a.download = `backup_agenda_${currentYear}_${dataStr}_${horaStr}.json`;
         a.click();
     }
 
