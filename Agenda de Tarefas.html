@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Agenda Pro 2026 - Cores na Impressão</title>
+    <title>Agenda Pro 2026 - Som Ativado</title>
     <style>
         :root {
             --bg: #f8fafc;
@@ -17,14 +17,12 @@
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: #1e293b; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .container { width: 100%; max-width: 550px; background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 80px; }
         
-        /* Formulário */
         .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
         input { padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; outline: none; }
         .action-right { display: flex; justify-content: flex-end; margin-bottom: 20px; gap: 10px; }
         .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; border: none; font-weight: 500; }
         .btn-accent { background: var(--accent); color: white; }
 
-        /* Lista */
         ul { list-style: none; padding: 0; margin-top: 20px; }
         .task-item { 
             padding: 12px; border: 1px solid #f1f5f9; border-left: 5px solid var(--accent); 
@@ -33,7 +31,6 @@
         }
         .task-main { display: flex; justify-content: space-between; align-items: center; }
 
-        /* Timeline Barra */
         .progress-container { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
         .progress-bar { height: 100%; width: 0%; transition: width 1s linear; }
 
@@ -46,41 +43,27 @@
         .controls { display: flex; gap: 6px; }
         .btn-circle { width: 28px; height: 28px; border-radius: 50%; border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; }
         
-        /* Rodapé */
         .footer-tools { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 10px; border-top: 1px solid #e2e8f0; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; z-index: 100; }
-        .btn-tool { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 5px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; }
-        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; }
-        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+        .btn-tool { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 5px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; }
+        .btn-audio-status { background: #fdf2f2; color: #ef4444; border: 1px solid #fee2e2; padding: 5px 10px; font-size: 10px; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-weight: bold; }
+        .audio-on { background: #f0fdf4; color: #16a34a; border-color: #dcfce7; }
 
         #printHeader { display: none; }
 
-        /* --- AJUSTE CIRÚRGICO DA IMPRESSÃO --- */
         @media print {
+            body { 
+                padding: 0; 
+                background: white !important; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+                zoom: 70%; 
+            } 
             #printHeader { display: block; text-align: center; border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px; }
             .no-print, .footer-tools, .controls, .progress-container, h2 { display: none !important; } 
-            
-            body { padding: 0; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } 
             .container { box-shadow: none; border: none; width: 100%; max-width: 100%; margin: 0; }
-            
-            .task-item { 
-                border: 1px solid #eee !important; 
-                background: white !important; 
-                border-left: 12px solid #3b82f6 !important; /* Azul por padrão */
-                margin-bottom: 10px;
-                padding: 10px !important;
-                display: block !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-
-            /* Forçar cores específicas na impressão */
-            .notificar-atraso { 
-                border-left-color: #ef4444 !important; /* Vermelho */
-            }
-            .done { 
-                border-left-color: #22c55e !important; /* Verde */
-                opacity: 1 !important;
-            }
+            .task-item { border: 1px solid #eee !important; background: white !important; border-left: 12px solid #3b82f6 !important; margin-bottom: 10px; padding: 10px !important; display: block !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .notificar-atraso { border-left-color: #ef4444 !important; }
+            .done { border-left-color: #22c55e !important; opacity: 1 !important; }
             .done b { text-decoration: line-through; color: #1e293b !important; }
         }
     </style>
@@ -110,11 +93,16 @@
 
 <div class="footer-tools no-print">
     <span style="font-size: 11px; color: #94a3b8; margin-right: 10px;" id="relogio"></span>
+    
+    <button id="btnAudio" class="btn-audio-status" onclick="ativarSom()">Som: Desativado</button>
+    
     <button class="btn-tool" onclick="exportarBackup()">💾 Exportar</button>
-    <div class="file-input-wrapper">
-        <button class="btn-tool">📂 Importar</button>
-        <input type="file" accept=".json" onchange="importarBackup(event)">
-    </div>
+
+    <label class="btn-tool" style="cursor: pointer;">
+        📂 Importar
+        <input type="file" accept=".json" onchange="importarBackup(event)" style="display: none;">
+    </label>
+
     <button class="btn-tool" onclick="prepararImpressao()">🖨️ Imprimir</button>
     <button class="btn-tool" style="color: var(--danger);" onclick="limparAgenda()">🗑️ Limpar Tudo</button>
 </div>
@@ -122,12 +110,36 @@
 <script>
     const DB_NAME = 'agenda_2026_vGold_Final';
     const lista = document.getElementById('listaTarefas');
+    let audioContextAtivo = false;
 
     window.onload = () => {
         definirDataAtual();
         carregarTarefas();
         setInterval(atualizarInterface, 1000);
     };
+
+    function ativarSom() {
+        audioContextAtivo = true;
+        const btn = document.getElementById('btnAudio');
+        btn.innerText = "Som: Ativado";
+        btn.classList.add('audio-on');
+        tocarBeep();
+    }
+
+    function tocarBeep() {
+        if(!audioContextAtivo) return;
+        const context = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = context.createOscillator();
+        const gainNode = context.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(550, context.currentTime);
+        gainNode.gain.setValueAtTime(0.1, context.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.5);
+        oscillator.connect(gainNode);
+        gainNode.connect(context.destination);
+        oscillator.start();
+        oscillator.stop(context.currentTime + 0.5);
+    }
 
     function prepararImpressao() {
         document.getElementById('printDate').innerText = new Date().toLocaleString('pt-BR');
@@ -144,8 +156,8 @@
 
             const inicio = parseInt(item.getAttribute('data-criacao'));
             const fim = new Date(item.getAttribute('data-hora')).getTime();
-            const total = fim - inicio;
             const decorrido = agora.getTime() - inicio;
+            const total = fim - inicio;
             
             let percent = Math.min(Math.max((decorrido / total) * 100, 0), 100);
             const barra = item.querySelector('.progress-bar');
@@ -154,7 +166,10 @@
                 barra.style.width = percent + "%";
                 if (agora.getTime() >= fim) {
                     barra.style.backgroundColor = 'var(--danger)';
-                    item.classList.add('notificar-atraso');
+                    if (!item.classList.contains('notificar-atraso')) {
+                        item.classList.add('notificar-atraso');
+                        tocarBeep();
+                    }
                 } else {
                     item.classList.remove('notificar-atraso');
                     if (percent > 80) barra.style.backgroundColor = 'var(--warning)';
@@ -270,45 +285,52 @@
     }
 
     function exportarBackup() {
-    // 1. Pegar os dados da agenda que estão no LocalStorage
-    const dados = localStorage.getItem(DB_NAME);
-    
-    if (!dados || dados === "[]") {
-        alert("Não há tarefas para exportar.");
-        return;
+        const dados = localStorage.getItem(DB_NAME);
+        if (!dados || dados === "[]") {
+            alert("Não há tarefas para exportar.");
+            return;
+        }
+        const agora = new Date();
+        const f = (n) => String(n).padStart(2, '0');
+        const anoStr = String(agora.getFullYear()); // Captura o ano atual (ex: 2026, 2027...)
+        
+        // Nome agora usa a variável anoStr para ser dinâmico em ambas as posições
+        const nomeArquivo = `backup_agenda_${anoStr}_${f(agora.getDate())}-${f(agora.getMonth() + 1)}-${anoStr}_${f(agora.getHours())}h${f(agora.getMinutes())}.json`;
+        
+        const blob = new Blob([dados], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nomeArquivo;
+        document.body.appendChild(a); 
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
-    // 2. Gerar a data e hora para o nome do arquivo
-    const agora = new Date();
-    const f = (n) => String(n).padStart(2, '0');
-    const dataStr = `${f(agora.getDate())}-${f(agora.getMonth() + 1)}`;
-    const horaStr = `${f(agora.getHours())}h${f(agora.getMinutes())}`;
-    const nomeArquivo = `backup_agenda_2026_${dataStr}_${horaStr}.json`;
-
-    // 3. Criar o arquivo e disparar o download
-    const blob = new Blob([dados], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    
-    a.href = url;
-    a.download = nomeArquivo;
-    document.body.appendChild(a); // Necessário para alguns navegadores
-    a.click();
-    
-    // Limpeza
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-
     function importarBackup(event) {
+        const arquivo = event.target.files[0];
+        if (!arquivo) return;
+
         const reader = new FileReader();
         reader.onload = (e) => {
-            localStorage.setItem(DB_NAME, e.target.result);
-            carregarTarefas();
-            alert("Backup Restaurado!");
+            try {
+                const conteudo = e.target.result;
+                const dadosValidados = JSON.parse(conteudo);
+
+                if (Array.isArray(dadosValidados)) {
+                    localStorage.setItem(DB_NAME, JSON.stringify(dadosValidados));
+                    alert("✅ Backup Restaurado com sucesso!");
+                    carregarTarefas();
+                } else {
+                    alert("❌ Erro: O arquivo não possui um formato de agenda válido.");
+                }
+            } catch (err) {
+                alert("❌ Erro ao ler o arquivo: Certifique-se de que é um arquivo .json válido.");
+            }
+            event.target.value = '';
         };
-        reader.readAsText(event.target.files[0]);
+        reader.readAsText(arquivo);
     }
 </script>
 </body>
