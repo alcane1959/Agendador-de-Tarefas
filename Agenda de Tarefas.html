@@ -194,11 +194,12 @@
 
         let tarefas = JSON.parse(localStorage.getItem(DB_NAME)) || [];
 
-        if (idEd) {
+       if (idEd) {
             const idx = tarefas.findIndex(t => t.id == idEd);
             if (idx !== -1) {
                 tarefas[idx].texto = txt.value;
                 tarefas[idx].data = dt.value;
+                // NÃO mexemos no criacao aqui para preservar o histórico
             }
             cancelarEdicao();
         } else {
