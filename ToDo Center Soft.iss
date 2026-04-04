@@ -13,7 +13,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{BA13511C-4C36-418A-A7A8-1E457304583F}
+AppId={{1E6A193F-2D21-4A06-9440-0BCBF01A9E60}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -35,7 +35,7 @@ Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortugue
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\MeusProjetos\AgendaTarefas\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\MeusProjetos\AgendaTarefas\Agenda de Tarefas.html"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\MeusProjetos\AgendaTarefas\CENTRO_DE_TAREFAS.html"; DestDir: "{app}"; Flags: ignoreversion
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
