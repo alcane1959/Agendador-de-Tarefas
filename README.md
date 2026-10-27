@@ -102,6 +102,10 @@ Como a imagem de fundo e as fontes são carregadas de serviços externos, esses 
 
 **Alberto de Campos Neto**
 
+---
+
+Este projeto é uma demonstração educacional desenvolvida para estudos de HTML, CSS e JavaScript. A empresa mencionada é fictícia e qualquer semelhança com empresas reais é mera coincidência.
+
 **Center Soft Inc.®**
 
 ## Licença
